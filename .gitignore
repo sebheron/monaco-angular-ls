@@ -1,0 +1,5 @@
+.vscode/settings.json
+.vite/
+node_modules
+*.tgz
+build.js
