@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@angular/language-service':
-        specifier: 21.2.5
-        version: 21.2.5
       monaco-editor:
         specifier: '>0.55.0'
         version: 0.55.1
@@ -18,6 +15,9 @@ importers:
         specifier: ^1.0.6
         version: 1.0.6
     devDependencies:
+      '@angular/language-service':
+        specifier: 21.2.5
+        version: 21.2.5
       rolldown:
         specifier: 1.0.0-rc.10
         version: 1.0.0-rc.10
