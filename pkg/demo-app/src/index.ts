@@ -6,8 +6,27 @@ import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-angular-worker?worker';
 
+//@ts-ignore
+import { WorkerManager } from "monaco-editor/esm/vs/language/typescript/workerManager.js";
+// import { editor } from "monaco-editor/esm/vs/editor/editor.api2.js";
+  
+const EXTRA_LANGUAGES = new Set(["html", "css", "scss", "less", "stylus", "sass"]);
+
+const original = WorkerManager.prototype.getLanguageServiceWorker;
+
+WorkerManager.prototype.getLanguageServiceWorker = async function (...resources: any[]) {
+  // Collect all html/css/scss model URIs
+  const extraUris = monaco.editor
+    .getModels()
+    .filter((m) => EXTRA_LANGUAGES.has(m.getLanguageId()))
+    .map((m) => m.uri);
+
+  return original.call(this, ...resources, ...extraUris);
+};
+
 self.MonacoEnvironment = {
     getWorker(_, label) {
+        console.log(label);
         if (label === 'typescript' || label === 'javascript') {
             return new tsWorker();
         }
@@ -63,14 +82,31 @@ monaco.typescript.typescriptDefaults.addExtraLib(
     'file:///node_modules/tslib/index.d.ts'
 );
 
-monaco.typescript.typescriptDefaults.setEagerModelSync(true);
+// monaco.typescript.typescriptDefaults.setEagerModelSync(true);
 
-// monaco.languages.onLanguage('typescript', () => {
-//     monaco.typescript.getTypeScriptWorker().then(async workerFn => {
-//         const worker = await workerFn();
-//         console.log('Worker is ready', worker);
-//     });
-// });
+monaco.languages.onLanguage('typescript', () => {
+    monaco.typescript.getTypeScriptWorker().then(async workerFn => {
+        const worker = await workerFn(tsUri);
+        console.log(Object.keys(worker));
+        
+        // // Manually push the HTML model to the worker
+        // //@ts-ignore
+        // worker.$acceptNewModel({
+        //     url: htmlUri.toString(),
+        //     lines: htmlModel.getLinesContent(),
+        //     EOL: htmlModel.getEOL(),
+        //     versionId: htmlModel.getVersionId()
+        // });
+
+        // worker.$acceptNewModel({
+        //     url: cssUri.toString(),
+        //     lines: cssModel.getLinesContent(),
+        //     EOL: cssModel.getEOL(),
+        //     versionId: cssModel.getVersionId()
+        // });
+
+    });
+});
 
 const tsUri = monaco.Uri.parse('file:///app/app.ts');
 const tsModel = monaco.editor.createModel(
