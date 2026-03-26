@@ -35,6 +35,7 @@ html, body {
     width: 80%;
     height: 80%;
     border-radius: 8px;
+    background-color: var(--bg-monaco);
 }
 
 .header {
@@ -88,7 +89,18 @@ html, body {
     height: 0.8rem;
 }
 
+.monaco-container {
+    position: relative;
+    width: 100%;
+    flex: 1;
+}
+
 #monaco-editor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-color: var(--bg-monaco);
     border-bottom-right-radius: 8px;
     border-bottom-left-radius: 8px;
