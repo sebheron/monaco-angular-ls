@@ -37,11 +37,13 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./pkg/sandbox/dist
-      - name: Create changeset version PR
+      - name: Create changeset version PR or publish
         uses: changesets/action@v1
         with:
           version: pnpm changeset version
+          publish: pnpm changeset publish
           commit: "chore: version packages"
           title: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
