@@ -3,7 +3,7 @@ name: Monaco Angular PR (Skip)
 on:
   pull_request:
     branches:
-      - main
+      - master
     paths-ignore:
       - "package.json"
       - "pnpm-lock.yaml"
