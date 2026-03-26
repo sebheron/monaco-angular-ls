@@ -6,8 +6,8 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc --noEmit && vite build",
-        "test": "vitest",
-        "test:ci": "vitest --browser.headless"
+        "test:ui": "vitest",
+        "test": "vitest --browser.headless"
     },
     "packageManager": "pnpm@10.28.0",
     "dependencies": {
