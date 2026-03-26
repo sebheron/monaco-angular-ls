@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
       - name: Setup Node.js environment
         uses: actions/setup-node@v6.3.0
         with:
@@ -46,11 +49,10 @@ jobs:
           echo "---" >> .changeset/auto-changeset.md
           echo "" >> .changeset/auto-changeset.md
           echo "$TITLE" >> .changeset/auto-changeset.md
-      
       - name: Commit changeset
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .changeset/auto-changeset.md
           git commit -m "chore: add changeset [skip ci]" || echo "No changes to commit"
-          git push
+          git push origin HEAD:${{ github.head_ref }}
