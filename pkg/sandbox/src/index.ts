@@ -153,7 +153,5 @@ appCssTab.addEventListener('click', () => setActiveTab('app-css'));
 
 const del = document.getElementById('delete');
 del?.addEventListener('click', () => {
-    console.log('Disposing model');
     htmlModel.dispose();
-    console.log('Disposed', monaco.editor.getModels().map(m => m.uri.toString()));
 });

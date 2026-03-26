@@ -425,7 +425,6 @@ class AngularWorker extends TypeScriptWorker {
 
   async getSemanticDiagnostics(fileName) {
     try {
-      console.log("getSemanticDiagnostics " + fileName);
       const diagnostics =
         this.getAngularLanguageService().getSemanticDiagnostics(fileName);
       const clearedDiagnostics = TypeScriptWorker.clearFiles(diagnostics).map(
