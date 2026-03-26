@@ -327,6 +327,12 @@ class AngularWorker extends TypeScriptWorker {
     // Admittedly the angular worker does seem to request more often, but it doesn't seem to add overhead.
     // So I'm going to skip this, but I'm leaving this as a note if the angular worker ends up being slow.
     //this.fetchingFromCache = false;
+    if (!createData.compilerOptions.angularConfig) {
+      throw new Error(
+        "The Angular worker hasn't be setup."
+      );
+    }
+    this._angularConfig = createData.compilerOptions.angularConfig;
     this._angularLanguageService = null;
     this._virtualScriptInfos = new Map();
     this._htmlLanguageService = getHTMLLanguageService({
@@ -403,13 +409,11 @@ class AngularWorker extends TypeScriptWorker {
     const project = buildProject(this, this._virtualScriptInfos, fileAccessor);
 
     this._angularLanguageService = plugin.create({
-      // TODO: Make this configurable.
       project,
       languageService: this._languageService,
       languageServiceHost: this,
       config: {
-        angularOnly: false,
-        forceStrictTemplates: true,
+        ...this._angularConfig,
       },
       serverHost: {
         readFile: fileAccessor.readFile,

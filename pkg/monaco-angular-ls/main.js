@@ -72,12 +72,21 @@ function syncAllLanguages() {
   );
 }
 
-function interceptTs(instance) {
+function interceptTs(instance, angularConfig) {
   if (patched.has(instance)) return;
   patched.add(instance);
   if (instance._worker) {
     instance._worker.dispose();
     instance._worker = null;
+  }
+  if (instance._defaults.getCompilerOptions) {
+    const optsFn = instance._defaults.getCompilerOptions;
+    instance._defaults.getCompilerOptions = function () {
+      return {
+        ...optsFn.call(this),
+        angularConfig: angularConfig,
+      }
+    }
   }
   instance._client = null;
   tsInstance = instance;
@@ -107,7 +116,10 @@ function waitForTs() {
   });
 }
 
-function setupAngularWorker() {
+function setupAngularWorker(config = { strictTemplates: true }) {
+  // Strip stuff that can't be serialized.
+  const strippedConfig = JSON.parse(JSON.stringify(config));
+
   const origTs = Object.getOwnPropertyDescriptors(TSWorkerManager.prototype);
   const origHtml = Object.getOwnPropertyDescriptors(
     HTMLWorkerManager.prototype
@@ -115,11 +127,11 @@ function setupAngularWorker() {
   const disposables = [];
 
   TSWorkerManager.prototype._getClient = function () {
-    interceptTs(this);
+    interceptTs(this, strippedConfig);
     return getClient.call(this);
   };
   TSWorkerManager.prototype.getLanguageServiceWorker = function (...args) {
-    interceptTs(this);
+    interceptTs(this, strippedConfig);
     return getLanguageServiceWorker.call(this, ...args);
   };
 
