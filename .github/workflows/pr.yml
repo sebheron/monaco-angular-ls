@@ -42,7 +42,7 @@ jobs:
           fi
           
           echo "---" > .changeset/auto-changeset.md
-          echo "\"monaco-angular-ls\": $TYPE" >> .changeset/auto-changeset.md
+          echo "\"monaco-angular\": $TYPE" >> .changeset/auto-changeset.md
           echo "---" >> .changeset/auto-changeset.md
           echo "" >> .changeset/auto-changeset.md
           echo "$TITLE" >> .changeset/auto-changeset.md

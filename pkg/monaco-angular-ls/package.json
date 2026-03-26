@@ -1,6 +1,9 @@
 {
   "name": "monaco-angular",
-  "version": "21.2.5",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Worker for Angular language service in the Monaco Editor",
   "type": "module",
   "keywords": [
