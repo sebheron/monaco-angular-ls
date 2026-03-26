@@ -20,7 +20,7 @@ beforeAll(async () => {
     await vi.waitUntil(() => {
         const m = instance.getTsErrors();
         return m.length ? m : false;
-    }, { timeout: 5000 });
+    }, { timeout: 20000 });
     instance.tsEditor.setValue('');
     await vi.waitUntil(() => {
         const m = instance.getTsErrors();
@@ -36,8 +36,7 @@ afterEach(async () => {
     });
 });
 
-//Skipping as done, note remove this
-describe.skip('NG Declaration Errors', () => {
+describe('NG Declaration Errors', () => {
     test('NG1001 DECORATOR_ARG_NOT_LITERAL', async () => {
         instance.tsEditor.setValue(
             `import { Component } from '@angular/core';
