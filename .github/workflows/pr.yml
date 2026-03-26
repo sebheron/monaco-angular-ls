@@ -33,8 +33,13 @@ jobs:
       - run: pnpm build
       - run: pnpm --filter sandbox exec playwright install --with-deps chromium
       - run: pnpm test
-      - name: Generate changeset
+      - name: Generate and commit changeset
         run: |
+          if [ -f .changeset/auto-changeset.md ]; then
+            echo "Changeset already exists, skipping"
+            exit 0
+          fi
+
           TYPE="patch"
           TITLE="${{ github.event.pull_request.title }}"
           
@@ -49,10 +54,9 @@ jobs:
           echo "---" >> .changeset/auto-changeset.md
           echo "" >> .changeset/auto-changeset.md
           echo "$TITLE" >> .changeset/auto-changeset.md
-      - name: Commit changeset
-        run: |
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .changeset/auto-changeset.md
-          git commit -m "chore: add changeset [skip ci]" || echo "No changes to commit"
+          git commit -m "chore: add changeset"
           git push origin HEAD:${{ github.head_ref }}
