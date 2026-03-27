@@ -17,7 +17,7 @@ pnpm install monaco-angular
 ## Usage
 
 ### Setting up the worker
-Setting up the worker just requires two imports. `setupAngularWorker` must be called before the editor is intialised as it patches some of the monaco editor's internals to handle the extra features. To enable html template support, the `angularWorker` must be created outside of the `getWorker` function and returned for both **typescript** and **html** labels. Other labels like css, sass, etc. are supported but largely untested as of now.
+The package exposes both the worker and a function to setup the worker. `setupAngularWorker` must be called before the editor is intialised as it patches some of the monaco editor's internals. To enable html template support, the `angularWorker` must be created outside of the `getWorker` function and returned for both **typescript** and **html** labels. Other labels like css, sass, etc. are supported but largely untested as of now.
 ```typescript
 import setupAngularWorker from 'monaco-angular';
 import angularWorker from 'monaco-angular/worker?worker';
@@ -114,7 +114,7 @@ monaco.typescript.typescriptDefaults.addExtraLib(
     'file:///node_modules/tslib/tslib.d.ts'
 );
 
-//Make sure to include some additional compiler options too for tslib and to fix paths for the angular imports.
+//Make sure to include some additional compiler options too for tslib and fix paths for the angular imports.
 monaco.typescript.typescriptDefaults.setCompilerOptions({
     // Existing compiler options...
     experimentalDecorators: true,
