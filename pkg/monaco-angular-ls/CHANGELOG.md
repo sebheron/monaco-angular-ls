@@ -4,4 +4,4 @@
 
 ### Patch Changes
 
-- 093a7dc: Update dependency typescript to v6
+- Initial release
