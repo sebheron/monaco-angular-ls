@@ -152,7 +152,8 @@ export function createEditors(htmlElement: HTMLElement, tsElement: HTMLElement) 
         scrollBeyondLastLine: false,
         minimap: {
             enabled: false
-        }
+        },
+        "semanticHighlighting.enabled": true,
     }
 
     const htmlEditor = monaco.editor.create(htmlElement, editorSettings);

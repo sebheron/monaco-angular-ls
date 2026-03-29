@@ -2,8 +2,14 @@ import { WorkerManager as TSWorkerManager } from "monaco-editor/esm/vs/language/
 import { WorkerManager as HTMLWorkerManager } from "monaco-editor/esm/vs/language/html/workerManager.js";
 import { Emitter } from 'monaco-editor/esm/vs/base/common/event.js';
 import { DiagnosticsAdapter } from "monaco-editor/esm/vs/language/html/htmlMode.js";
-import { editor } from "monaco-editor/esm/vs/editor/editor.api2.js";
+import { editor, languages } from "monaco-editor/esm/vs/editor/editor.api2.js";
 import { createWebWorker } from "monaco-editor/esm/vs/common/workers.js";
+import { typescript } from "monaco-editor/esm/vs/language/typescript/lib/typescriptServices.js";
+
+const { TokenType, TokenModifier } = typescript.classifier.v2020;
+
+const tokenTypes = Object.keys(TokenType).filter(k => isNaN(Number(k)));
+const tokenModifiers = Object.keys(TokenModifier).filter(k => isNaN(Number(k)));
 
 const ALL_LANGUAGES = new Set([
   "typescript",
@@ -17,6 +23,58 @@ const ALL_LANGUAGES = new Set([
 
 let tsInstance = null;
 const patched = new WeakSet();
+
+function createSemanticTokensProvider(getWorker) {
+  return {
+    getLegend() {
+      return {
+        tokenTypes,
+        tokenModifiers,
+      };
+    },
+
+    async provideDocumentSemanticTokens(model) {
+      const worker = await getWorker(model.uri);
+      const result = await worker.getEncodedSemanticClassifications(
+        model.uri.toString(),
+        { start: 0, length: model.getValue().length },
+        '2020'
+      );
+
+      if (!result?.spans?.length) return null;
+
+      const data = [];
+      let prevLine = 0;
+      let prevChar = 0;
+
+      for (let i = 0; i < result.spans.length; i += 3) {
+        const start = result.spans[i];
+        const length = result.spans[i + 1];
+        const classification = result.spans[i + 2];
+
+        const tokenType = (classification >> 8) - 1;
+        const tokenModifiers = classification & 0xFF;
+
+        if (tokenType < 0) continue;
+
+        const pos = model.getPositionAt(start);
+        const line = pos.lineNumber - 1;
+        const char = pos.column - 1;
+
+        const deltaLine = line - prevLine;
+        const deltaStart = deltaLine === 0 ? char - prevChar : char;
+
+        data.push(deltaLine, deltaStart, length, tokenType, tokenModifiers);
+        prevLine = line;
+        prevChar = char;
+      }
+
+      return { data: new Uint32Array(data) };
+    },
+
+    releaseDocumentSemanticTokens() {}
+  };
+}
 
 function getClient() {
   if (!this._client) {
@@ -152,7 +210,7 @@ function setupAngularWorker(config = { strictTemplates: true }) {
   HTMLWorkerManager.prototype._stopWorker = function () {};
   HTMLWorkerManager.prototype._checkIfIdle = function () {};
 
-  const htmlWorker = (...uris) => {
+  const sharedWorker = (...uris) => {
     return waitForTs().then((ts) => ts.getLanguageServiceWorker(...uris));
   };
 
@@ -182,9 +240,19 @@ function setupAngularWorker(config = { strictTemplates: true }) {
     watch(e.model);
   }));
   disposables.push(
-    new DiagnosticsAdapter("html", htmlWorker, (cb) => emitter.event(cb))
+    new DiagnosticsAdapter("html", sharedWorker, (cb) => emitter.event(cb))
   );
   disposables.push({ dispose: () => listeners.forEach((l) => l.dispose()) });
+  disposables.push(
+    languages.registerDocumentSemanticTokensProvider(
+      'typescript', createSemanticTokensProvider(sharedWorker)
+    )
+  );
+  disposables.push(
+    languages.registerDocumentSemanticTokensProvider(
+      'html', createSemanticTokensProvider(sharedWorker)
+    )
+  );
 
   return () => {
     Object.defineProperties(TSWorkerManager.prototype, origTs);

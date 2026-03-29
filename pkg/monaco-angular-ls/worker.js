@@ -592,13 +592,18 @@ class AngularWorker extends TypeScriptWorker {
           span,
           format
         );
-      if (result?.spans?.length) return result;
+      return result;
     } catch {}
-    return this._languageService.getEncodedSemanticClassifications(
-      fileName,
-      span,
-      format
-    );
+    if (fileName.endsWith(".ts")) {
+      return this._languageService.getEncodedSemanticClassifications(
+        fileName,
+        span,
+        format
+      );
+    }
+    // Can't return default encoded semantic classifications as the standard language service will break on html.
+    // Always return nothing if it doesn't work. Which will default back to standard highlighting.
+    return [];
   }
 
   async getOutliningSpans(fileName) {
