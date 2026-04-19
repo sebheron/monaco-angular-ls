@@ -16,7 +16,7 @@ jobs:
           node-version: "24.x"
           node-version-file: "package.json"
       - name: Setup pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm --filter sandbox exec playwright install --with-deps chromium
@@ -41,7 +41,7 @@ jobs:
           node-version: "24.x"
           node-version-file: "package.json"
       - name: Setup pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - name: Create changeset version PR or publish
